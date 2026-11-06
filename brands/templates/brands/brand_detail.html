@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}{{ brand.name }} Bikes — BikeAI{% endblock %}
+{% block body_class %}brands-page{% endblock %}
+
+{% block content %}
+<section class="brand-detail-shell container py-3 py-lg-4">
+  <nav class="brand-breadcrumb" aria-label="Breadcrumb">
+    <a href="{% url 'core:landing' %}">Home</a>
+    <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+    <a href="{% url 'brands:brand_list' %}">Brands</a>
+    <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+    <span>{{ brand.name }}</span>
+  </nav>
+
+  <div class="brand-hero" style="--brand-color: {{ brand_info.theme_color }};">
+    <div class="brand-hero-glow"></div>
+    <div class="brand-hero-content">
+      <div class="brand-hero-logo">
+        {% if brand_info.logo_url %}
+          <img src="{{ brand_info.logo_url }}" alt="{{ brand.name }} logo">
+        {% else %}
+          <span>{{ brand.name|first|upper }}</span>
+        {% endif %}
+      </div>
+      <div>
+        <span class="brand-hero-kicker">BIKE BRAND</span>
+        <h1>{{ brand.name }}</h1>
+        <p>{{ brand_info.bike_count }} {% if brand_info.bike_count == 1 %}model{% else %}models{% endif %} in the BikeAI catalogue</p>
+      </div>
+    </div>
+    <div class="brand-hero-actions">
+      <a class="btn btn-accent" href="/dealers/map/?brand={{ brand.name|urlencode }}">
+        <i class="fa-solid fa-location-dot me-2"></i>Find Nearby Dealers for {{ brand.name }}
+      </a>
+    </div>
+  </div>
+
+  <div class="d-flex align-items-end justify-content-between gap-3 flex-wrap mt-5 mb-3">
+    <div>
+      <span class="brands-kicker">{{ brand.name|upper }}</span>
+      <h2 class="h1 mb-1">Explore {{ brand.name }} Bikes</h2>
+      <p class="text-muted-custom mb-0">Browse the available models and compare their key specifications.</p>
+    </div>
+    <a class="btn btn-outline-accent" href="{% url 'brands:brand_list' %}">
+      <i class="fa-solid fa-arrow-left me-2"></i>All Brands
+    </a>
+  </div>
+
+  {% if bikes %}
+    <div class="row g-3 g-lg-4">
+      {% for bike in bikes %}
+        <div class="col-12 col-sm-6 col-lg-4">
+          {% include 'partials/bike_card.html' with bike=bike %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="panel p-5 text-center">
+      <i class="fa-solid fa-motorcycle fs-1 text-accent mb-3"></i>
+      <h2>No bikes available</h2>
+      <p class="text-muted-custom mb-4">This brand does not currently have any active bikes in the catalogue.</p>
+      <a class="btn btn-outline-accent" href="{% url 'brands:brand_list' %}">Browse Other Brands</a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .brand-detail-shell{ position:relative; z-index:1; }
+  .brand-breadcrumb{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:.55rem;
+    margin-bottom:1rem;
+    color:var(--text-secondary);
+    font-size:.88rem;
+  }
+  .brand-breadcrumb a{ color:var(--text-secondary); text-decoration:none; }
+  .brand-breadcrumb a:hover{ color:var(--accent-primary); }
+  .brand-breadcrumb i{ font-size:.65rem; opacity:.65; }
+  .brand-breadcrumb span{ color:var(--text-primary); font-weight:700; }
+  .brand-hero{
+    position:relative;
+    min-height:300px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:2rem;
+    padding:2.2rem;
+    overflow:hidden;
+    border-radius:var(--radius-lg);
+    background:
+      linear-gradient(135deg,
+        color-mix(in srgb, var(--brand-color) 24%, var(--card-bg)),
+        var(--card-bg) 58%,
+        color-mix(in srgb, var(--accent-secondary) 10%, var(--card-bg)));
+    border:1px solid var(--card-border);
+    box-shadow:var(--shadow);
+  }
+  .brand-hero::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(90deg, rgba(255,255,255,.7), rgba(255,255,255,.9));
+    opacity:0;
+    pointer-events:none;
+  }
+  :root[data-theme="light"] .brand-hero::after{ opacity:.18; }
+  :root[data-theme="dark"] .brand-hero::after{
+    background:linear-gradient(90deg, rgba(0,0,0,.6), rgba(0,0,0,.85));
+    opacity:.18;
+  }
+  .brand-hero-glow{
+    position:absolute;
+    width:360px;
+    height:360px;
+    right:-80px;
+    top:-130px;
+    border-radius:50%;
+    background:color-mix(in srgb, var(--brand-color) 28%, transparent);
+    filter:blur(30px);
+    opacity:.7;
+  }
+  .brand-hero-content,
+  .brand-hero-actions{ position:relative; z-index:2; }
+  .brand-hero-content{ display:flex; align-items:center; gap:1.5rem; }
+  .brand-hero-logo{
+    width:110px;
+    height:110px;
+    flex:0 0 110px;
+    border-radius:26px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--card-bg);
+    border:1px solid color-mix(in srgb, var(--brand-color) 45%, transparent);
+    box-shadow:0 16px 40px color-mix(in srgb, var(--brand-color) 18%, transparent);
+    overflow:hidden;
+  }
+  .brand-hero-logo img{ width:76%; height:76%; object-fit:contain; }
+  .brand-hero-logo span{
+    font-family:var(--font-display);
+    font-size:3.4rem;
+    font-weight:800;
+    color:var(--brand-color);
+  }
+  .brand-hero-kicker{ color:var(--accent-primary); font-size:.75rem; font-weight:800; letter-spacing:.18em; }
+  .brand-hero h1{ margin:.15rem 0 .25rem; font-family:var(--font-display); font-size:clamp(2.3rem, 6vw, 4.6rem); font-weight:800; color:var(--text-primary); }
+  .brand-hero p{ margin:0; color:var(--text-secondary); font-size:1rem; }
+  .brand-hero-actions .btn{ white-space:nowrap; box-shadow:0 10px 28px color-mix(in srgb, var(--accent-primary) 18%, transparent); }
+  /* Keep the shared bike-card design, but cancel the legacy global 200% height
+     rule on this page so cards wrap naturally around their content. */
+  .brands-page .row > [class*="col-"]{ display:flex; }
+  .brands-page .row > [class*="col-"] .bike-card{
+    width:100%;
+    height:auto;
+    min-height:0;
+  }
+  .brands-page .bike-card-media{ height:170px; }
+  .brand-detail-shell h2{ font-family:var(--font-display); color:var(--text-primary); }
+  @media (max-width:767.98px){
+    .brand-hero{ min-height:0; flex-direction:column; align-items:flex-start; padding:1.4rem; }
+    .brand-hero-content{ align-items:flex-start; }
+    .brand-hero-logo{ width:78px; height:78px; flex-basis:78px; border-radius:18px; }
+    .brand-hero-logo span{ font-size:2.4rem; }
+    .brand-hero-actions{ width:100%; }
+    .brand-hero-actions .btn{ width:100%; white-space:normal; }
+  }
+  @media (max-width:480px){
+    .brand-hero-content{ gap:1rem; }
+    .brand-hero h1{ font-size:2.1rem; }
+  }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+{% if user.is_authenticated %}
+<script>
+  function toggleWishlist(el) {
+    const bikeId = el.dataset.bikeId;
+    fetch(`/recommend/wishlist/toggle/${bikeId}/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+      .then(response => response.json())
+      .then(data => el.classList.toggle('active', data.status === 'added'))
+      .catch(() => { window.location.href = "{% url 'accounts:login' %}"; });
+  }
+</script>
+{% endif %}
+{% endblock %}
